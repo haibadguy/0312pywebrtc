@@ -1,8 +1,7 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, send_file, request, jsonify
 from aiortc import RTCPeerConnection, RTCSessionDescription
 
 app = Flask(__name__)
-pcs = set()
 
 @app.route('/')
 def index():
@@ -15,7 +14,6 @@ async def offer():
     offer = RTCSessionDescription(sdp=params['sdp'], type=params['type'])
 
     pc = RTCPeerConnection()
-    pcs.add(pc)
 
     @pc.on('icecandidate')
     def on_icecandidate(candidate):
