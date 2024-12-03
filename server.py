@@ -6,7 +6,8 @@ pcs = set()
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    # Load index.html từ thư mục chính
+    return send_file('index.html')
 
 @app.route('/offer', methods=['POST'])
 async def offer():
