@@ -1,7 +1,6 @@
 Flask==2.0.1
 aiortc==1.2.0
 av==8.1.0
-aioice==0.7.6
-cryptography
-cffi
+cryptography>=3.4.8
+cffi>=1.14.6
 numpy
