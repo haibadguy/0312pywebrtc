@@ -7,3 +7,5 @@ libvpx-dev
 libx264-dev
 libx265-dev
 libssl-dev
+libffi-dev
+python3-dev
