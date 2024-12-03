@@ -1,0 +1,9 @@
+build-essential
+pkg-config
+libavdevice-dev
+libavfilter-dev
+libopus-dev
+libvpx-dev
+libx264-dev
+libx265-dev
+libssl-dev
