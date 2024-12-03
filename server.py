@@ -9,7 +9,7 @@ pcs = set()
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return send_from_directory(os.getcwd(), 'index.html')
 
 @app.route('/offer', methods=['POST'])
 async def offer():
