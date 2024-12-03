@@ -51,7 +51,7 @@
             const offer = await pc.createOffer();
             await pc.setLocalDescription(offer);
 
-            const response = await fetch('/offer', {
+            const response = await fetch('https://zero312pywebrtc.onrender.com/offer', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -61,6 +61,7 @@
                     type: pc.localDescription.type
                 })
             });
+
 
             const answer = await response.json();
             await pc.setRemoteDescription(new RTCSessionDescription(answer));
