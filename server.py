@@ -1,7 +1,8 @@
 from flask import Flask, render_template, request, jsonify
 from aiortc import RTCPeerConnection, RTCSessionDescription
 from urllib.parse import quote as url_quote
-
+from flask import send_from_directory
+import os
 app = Flask(__name__)
 
 # Khai báo pcs là một tập hợp chứa các kết nối peer
