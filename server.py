@@ -1,12 +1,14 @@
-from flask import Flask, send_file, request, jsonify
+from flask import Flask, render_template, request, jsonify
 from aiortc import RTCPeerConnection, RTCSessionDescription
 
 app = Flask(__name__)
 
+# Khai báo pcs là một tập hợp chứa các kết nối peer
+pcs = set()
+
 @app.route('/')
 def index():
-    # Load index.html từ thư mục chính
-    return send_file('index.html')
+    return render_template('index.html')
 
 @app.route('/offer', methods=['POST'])
 async def offer():
@@ -14,6 +16,7 @@ async def offer():
     offer = RTCSessionDescription(sdp=params['sdp'], type=params['type'])
 
     pc = RTCPeerConnection()
+    pcs.add(pc)  # Thêm đối tượng RTCPeerConnection vào pcs
 
     @pc.on('icecandidate')
     def on_icecandidate(candidate):
