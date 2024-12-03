@@ -23,35 +23,23 @@ async def offer():
     pc = RTCPeerConnection()
     pcs.add(pc)
 
-    # Logging ICE candidates
     @pc.on('icecandidate')
     def on_icecandidate(event):
         if event.candidate:
             logging.info('New ICE candidate: %s', event.candidate)
 
-    # Logging media tracks
     @pc.on('track')
     def on_track(track):
         logging.info('Received track: %s', track.kind)
         if track.kind == 'audio' or track.kind == 'video':
-            pc.addTrack(track)  # Ensure the track is added back to the peer
+            pc.addTrack(track)
 
-    # Set remote description and create answer
     await pc.setRemoteDescription(offer)
     answer = await pc.createAnswer()
     await pc.setLocalDescription(answer)
 
-    # Return SDP answer
     return jsonify({'sdp': pc.localDescription.sdp, 'type': pc.localDescription.type})
 
-@app.route('/shutdown', methods=['POST'])
-def shutdown():
-    # Close all peer connections
-    logging.info("Shutting down server...")
-    for pc in pcs:
-        pc.close()
-    pcs.clear()
-    return jsonify({'status': 'Server shutdown completed.'}), 200
-
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    port = int(os.getenv('PORT', 5000))  # Dùng biến môi trường PORT
+    app.run(debug=True, host='0.0.0.0', port=port)
