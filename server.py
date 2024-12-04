@@ -1,33 +1,34 @@
 import os
 import logging
-from flask import Flask, jsonify, request, send_from_directory
-from aiortc import RTCPeerConnection, RTCSessionDescription, MediaStreamTrack
-from flask_cors import CORS
+from quart import Quart, jsonify, request, send_from_directory
+from aiortc import RTCPeerConnection, RTCSessionDescription
+from quart_cors import cors
 
-app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": "*"}})
+# Khởi tạo ứng dụng Quart
+app = Quart(__name__)
+app = cors(app, allow_origin="*")  # Cho phép CORS
 
 logging.basicConfig(level=logging.INFO)
 
-# Global set to manage peer connections
+# Quản lý các kết nối PeerConnection
 pcs = set()
 
 @app.route('/')
-def index():
-    return send_from_directory(os.getcwd(), 'index.html')
+async def index():
+    return await send_from_directory(os.getcwd(), 'index.html')
 
 @app.route('/offer', methods=['POST'])
 async def offer():
     try:
-        params = request.json
+        params = await request.get_json()
         if not params or 'sdp' not in params or 'type' not in params:
             return jsonify({'error': 'Invalid request'}), 400
 
-        # Create peer connection
-        offer = RTCSessionDescription(sdp=params['sdp'], type=params['type'])
+        # Tạo PeerConnection
         pc = RTCPeerConnection()
         pcs.add(pc)
 
+        # Lắng nghe sự kiện ICE candidate
         @pc.on('icecandidate')
         def on_icecandidate(event):
             if event.candidate:
@@ -35,37 +36,32 @@ async def offer():
             else:
                 logging.info('All ICE candidates have been sent.')
 
+        # Xử lý track nhận được
         @pc.on('track')
         def on_track(track):
             logging.info('Received track: %s', track.kind)
             if track.kind == 'video':
                 logging.info("Handling video track...")
-                # Here you can process or forward the video track
             elif track.kind == 'audio':
                 logging.info("Handling audio track...")
             else:
                 logging.warning("Unsupported track type received.")
 
-        # Set remote description
+        # Đặt SDP từ offer và tạo answer
+        offer = RTCSessionDescription(sdp=params['sdp'], type=params['type'])
         await pc.setRemoteDescription(offer)
-        
-        # Create answer
+
         answer = await pc.createAnswer()
         await pc.setLocalDescription(answer)
 
         logging.info("Generated SDP answer for the offer.")
 
-        # Prepare response
-        response = jsonify({'sdp': pc.localDescription.sdp, 'type': pc.localDescription.type})
-        response.headers['Cache-Control'] = 'no-store, must-revalidate'
-        response.headers['X-Content-Type-Options'] = 'nosniff'
-
-        return response
+        # Trả về SDP answer
+        return jsonify({'sdp': pc.localDescription.sdp, 'type': pc.localDescription.type})
 
     except Exception as e:
         logging.error("Error processing offer: %s", e)
         return jsonify({'error': 'Failed to process offer'}), 500
-
 
 @app.route('/cleanup', methods=['POST'])
 async def cleanup():
@@ -75,7 +71,6 @@ async def cleanup():
     pcs.clear()
     return jsonify({'status': 'Cleaned up'})
 
-
 if __name__ == '__main__':
-    port = int(os.getenv('PORT', 5000))  # Use PORT from environment variable
+    port = int(os.getenv('PORT', 5000))  # Sử dụng PORT từ biến môi trường
     app.run(debug=True, host='0.0.0.0', port=port)
