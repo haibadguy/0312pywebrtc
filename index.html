@@ -43,23 +43,15 @@
                 localVideo.srcObject = localStream;
 
                 // Use predefined ICE servers
-                let iceServers = [
-                    {
-                        urls: ["stun:hk-turn1.xirsys.com"]
+                let iceServers = [{
+                        urls: "stun:stun.l.google.com:19302"
                     },
                     {
-                        username: "1IAAhUMZe232EUeqhMZhosEYc3kHZR2liZeIuCje_h984jZN9KxGZpCVkiwY92XpAAAAAGdPq65ob25naGFp",
-                        credential: "598d05e4-b1dc-11ef-9be1-0242ac120004",
-                        urls: [
-                            "turn:hk-turn1.xirsys.com:80?transport=udp",
-                            "turn:hk-turn1.xirsys.com:3478?transport=udp",
-                            "turn:hk-turn1.xirsys.com:80?transport=tcp",
-                            "turn:hk-turn1.xirsys.com:3478?transport=tcp",
-                            "turns:hk-turn1.xirsys.com:443?transport=tcp",
-                            "turns:hk-turn1.xirsys.com:5349?transport=tcp"
-                        ]
+                        urls: "stun:stun.services.mozilla.com"
                     }
+                    // Thêm TURN server khác nếu cần
                 ];
+
 
                 // Create peer connection with the fetched ICE servers
                 pc = new RTCPeerConnection({
