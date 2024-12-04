@@ -1,12 +1,12 @@
 import os
 import logging
-from quart import Quart, jsonify, request, send_from_directory
+from flask import Flask, jsonify, request, send_from_directory
 from aiortc import RTCPeerConnection, RTCSessionDescription
-from quart_cors import cors
+from flask_cors import CORS
 
-# Khởi tạo ứng dụng Quart
-app = Quart(__name__)
-app = cors(app, allow_origin="*")  # Cho phép CORS
+# Khởi tạo ứng dụng Flask
+app = Flask(__name__)
+CORS(app)  # Cho phép CORS
 
 logging.basicConfig(level=logging.INFO)
 
@@ -14,13 +14,13 @@ logging.basicConfig(level=logging.INFO)
 pcs = set()
 
 @app.route('/')
-async def index():
-    return await send_from_directory(os.getcwd(), 'index.html')
+def index():
+    return send_from_directory(os.getcwd(), 'index.html')
 
 @app.route('/offer', methods=['POST'])
-async def offer():
+def offer():
     try:
-        params = await request.get_json()
+        params = request.get_json()
         if not params or 'sdp' not in params or 'type' not in params:
             return jsonify({'error': 'Invalid request'}), 400
 
@@ -49,10 +49,10 @@ async def offer():
 
         # Đặt SDP từ offer và tạo answer
         offer = RTCSessionDescription(sdp=params['sdp'], type=params['type'])
-        await pc.setRemoteDescription(offer)
+        pc.setRemoteDescription(offer)
 
-        answer = await pc.createAnswer()
-        await pc.setLocalDescription(answer)
+        answer = pc.createAnswer()
+        pc.setLocalDescription(answer)
 
         logging.info("Generated SDP answer for the offer.")
 
@@ -64,10 +64,10 @@ async def offer():
         return jsonify({'error': 'Failed to process offer'}), 500
 
 @app.route('/cleanup', methods=['POST'])
-async def cleanup():
+def cleanup():
     logging.info("Cleaning up peer connections.")
     for pc in pcs:
-        await pc.close()
+        pc.close()
     pcs.clear()
     return jsonify({'status': 'Cleaned up'})
 
