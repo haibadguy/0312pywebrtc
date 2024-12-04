@@ -58,6 +58,8 @@
                 if (data.d && data.d.iceServers) {
                     iceServers = data.d.iceServers;
                     console.log('ICE Servers:', iceServers);
+                } else {
+                    throw new Error('No ICE servers received from Xirsys');
                 }
 
                 // Create peer connection with the fetched ICE servers
@@ -83,6 +85,11 @@
                     }
                 };
 
+                // Log ICE connection state
+                pc.oniceconnectionstatechange = () => {
+                    console.log('ICE Connection State:', pc.iceConnectionState);
+                };
+
                 // Create offer
                 const offer = await pc.createOffer();
                 await pc.setLocalDescription(offer);
@@ -105,11 +112,13 @@
 
                 // Set remote description with the server's answer
                 const answer = await offerResponse.json();
+                console.log('Received answer:', answer);
                 await pc.setRemoteDescription(new RTCSessionDescription(answer));
 
                 console.log('Call started successfully!');
             } catch (error) {
                 console.error('Error during call setup:', error);
+                alert(`Error: ${error.message}`);  // Hiển thị thông báo lỗi cho người dùng
             }
         }
 
@@ -130,7 +139,7 @@
         }
 
         startCallButton.addEventListener('click', startCall);
-        resetButton.addEventListener('click', reset);
+        resetButton.addEvent .addEventListener('click', reset);
     </script>
 </body>
 
