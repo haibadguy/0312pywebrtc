@@ -1,6 +1,6 @@
 import os
 import logging
-from flask import Flask, jsonify, request, send_from_directory
+from flask import Flask, jsonify, request, send_from_directory, Response
 from aiortc import RTCPeerConnection, RTCSessionDescription
 from flask_cors import CORS
 
@@ -42,7 +42,12 @@ async def offer():
         answer = await pc.createAnswer()
         await pc.setLocalDescription(answer)
 
-        return jsonify({'sdp': pc.localDescription.sdp, 'type': pc.localDescription.type})
+        # Create the response with additional headers
+        response = jsonify({'sdp': pc.localDescription.sdp, 'type': pc.localDescription.type})
+        response.headers['Cache-Control'] = 'no-store, must-revalidate'
+        response.headers['X-Content-Type-Options'] = 'nosniff'
+
+        return response
 
     except Exception as e:
         logging.error("Error processing offer: %s", e)
