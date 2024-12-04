@@ -8,3 +8,4 @@ av>=10.0.0
 cryptography>=3.4.8
 cffi>=1.14.6
 numpy>=1.21.0
+quart-cors
